@@ -49,27 +49,27 @@ class EstrPtr
 public:
     EstrRawData<'\0'>* _raw_data{}; // field is actually private, but I will not limit access just in case
 
-    [[nodiscard]] uint32_t size() const {
+    [[nodiscard]] constexpr uint32_t size() const {
         return _raw_data->length;
     }
 
-    [[nodiscard]] const char* data() const {
+    [[nodiscard]] constexpr const char* data() const {
         return _raw_data->chars;
     }
 
-    [[nodiscard]] bool needs_disposing() const {
+    [[nodiscard]] constexpr bool needs_disposing() const {
         return _raw_data->needs_disposing;
     }
 
-    [[nodiscard]] uint32_t hash() const {
+    [[nodiscard]] constexpr uint32_t hash() const {
         return _raw_data->hash;
     }
 
-    [[nodiscard]] const std::string_view view() const {
+    [[nodiscard]] constexpr const std::string_view view() const {
         return {data(), size()};
     }
 
-    void destroy() {
+    constexpr void destroy() {
         if (needs_disposing())
             delete[] (char*) _raw_data;
     }
@@ -121,7 +121,7 @@ namespace std
 {
     template<>
     struct hash<EstrPtr> {
-        size_t operator()(const EstrPtr& string) const {
+        constexpr size_t operator()(const EstrPtr& string) const {
             return string.hash();
         }
     };
@@ -135,7 +135,7 @@ namespace std
     }
 }
 
-inline bool operator==(const EstrPtr& a, const EstrPtr& b) {
+constexpr bool operator==(const EstrPtr& a, const EstrPtr& b) {
     if (a.size() != b.size())
         return false;
     if (a.hash() != b.hash())
@@ -143,7 +143,7 @@ inline bool operator==(const EstrPtr& a, const EstrPtr& b) {
     return !memcmp(a.data(), b.data(), a.size());
 }
 
-inline bool operator!=(const EstrPtr& a, const EstrPtr& b) {
+constexpr bool operator!=(const EstrPtr& a, const EstrPtr& b) {
     return !(a == b);
 }
 
@@ -185,7 +185,7 @@ public:
 #ifndef _MSC_VER
 // todo silence clang warning
 template<typename Char, Char... chars>
-auto operator ""_estr() {
+constexpr auto operator ""_estr() {
     return EstrPtr::_create_from_raw_data((EstrRawData<'\0'>*) &EstrUniqueStorage<chars..., '\0'>::data);
 }
 #endif
